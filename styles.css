@@ -64,6 +64,10 @@ body {
 .mode-legend { display: grid; grid-auto-flow: column; gap: 8px; padding: 8px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .mode-legend::-webkit-scrollbar { display: none; }
 .legend-chip { white-space: nowrap; color: var(--muted); font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); background: rgba(10,19,48,0.55); }
+.legend-chip { position: relative; overflow: hidden; }
+.legend-chip::after { content: ""; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transform: skewX(-20deg); opacity: 0; }
+.legend-chip:hover::after { animation: chipShine 900ms ease-in-out; }
+@keyframes chipShine { 0% { left: -40%; opacity: 0; } 50% { opacity: 1; } 100% { left: 120%; opacity: 0; } }
 /* Body ambient overlay (CSS-only, subtle) */
 body::before {
 	content: "";
@@ -90,6 +94,10 @@ body::before {
 .view-title .icon { font-size: 20px; filter: drop-shadow(0 0 10px rgba(34,229,255,0.25)); }
 .view:not([hidden]) { position: relative; }
 .view:not([hidden])::after { content: ""; position: absolute; inset: -1px; border-radius: 18px; pointer-events: none; background: radial-gradient(120px 40px at 10% -10%, rgba(34,229,255,0.18), transparent 60%), radial-gradient(120px 40px at 90% 110%, rgba(124,77,255,0.18), transparent 60%); filter: blur(8px); opacity: 0.7; }
+.view:not([hidden]) { animation: viewIn 320ms ease-out both, glowPulse 6s ease-in-out infinite; }
+@keyframes glowPulse { 0%,100% { box-shadow: 0 20px 40px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03); } 50% { box-shadow: 0 24px 46px rgba(0,0,0,0.48), inset 0 0 0 1px rgba(255,255,255,0.05); } }
+.view:not([hidden]) .icon { animation: popIn 380ms cubic-bezier(.2, .9, .2, 1) 1; }
+@keyframes popIn { 0% { transform: scale(.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
 .clock { display: grid; place-items: center; padding: 8px 0 0; }
 .clock-time { font-size: clamp(32px, 8vw, 52px); font-weight: 700; letter-spacing: 1.4px; text-shadow: 0 0 16px rgba(34,229,255,0.22); }
@@ -121,6 +129,10 @@ body::before {
 	transition: transform 120ms ease, box-shadow 200ms ease, border-color 200ms ease;
 	box-shadow: 0 0 0 0 rgba(0,0,0,0);
 }
+.btn { position: relative; overflow: hidden; }
+.btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(120px 120px at var(--rx,50%) var(--ry,50%), rgba(255,255,255,0.15), transparent 60%); opacity: 0; transform: scale(0.2); transition: opacity 200ms ease, transform 200ms ease; }
+.btn:active::after { opacity: 1; transform: scale(1); }
+.btn:focus-visible::after { opacity: .6; }
 .btn:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
 .btn:active { transform: translateY(1px) scale(0.99); }
 .btn:focus-visible { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(34,229,255,0.25); }
@@ -135,6 +147,10 @@ body::before {
 .timer-display { display: grid; place-items: center; gap: 12px; }
 .time-large { font-size: clamp(48px, 13vw, 76px); font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, #e6f1ff, #a8b8ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: 0 0 34px rgba(124,77,255,0.18); }
 .ring { width: 240px; height: 240px; }
+#view-timer:not([hidden]) .ring { animation: ringGlow 2.8s ease-in-out infinite; }
+@keyframes ringGlow { 0%,100% { filter: drop-shadow(0 0 10px rgba(124,77,255,0.18)); } 50% { filter: drop-shadow(0 0 16px rgba(34,229,255,0.22)); } }
+#view-stopwatch:not([hidden]) .time-large { animation: textShimmer 4.4s linear infinite; background-size: 200% 100%; }
+@keyframes textShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
 .chip { padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: #0a1330; color: var(--text); transition: transform 120ms ease, background 200ms ease, border-color 200ms ease; }
 .chip:hover { border-color: rgba(255,255,255,0.25); }
