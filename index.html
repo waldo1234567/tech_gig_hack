@@ -1,1 +1,116 @@
-	<script src="./app.js" defer></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+	<title>Orientations: Alarm • Stopwatch • Timer • Weather</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./styles.css">
+	<meta name="theme-color" content="#0f172a">
+</head>
+<body>
+	<header class="app-header" role="banner">
+		<div class="brand">Prompt This Into Existence!</div>
+		<div id="orientation-label" class="orientation-label" aria-live="polite">Detecting orientation…</div>
+	</header>
+
+	<main id="app" class="app" role="main">
+		<!-- Alarm Clock: portrait-primary -->
+		<section id="view-alarm" class="view" data-mode="portrait-primary" hidden>
+			<h1 class="view-title">Alarm Clock</h1>
+			<div class="clock" aria-live="polite" aria-atomic="true">
+				<div id="clock-time" class="clock-time">--:--:--</div>
+			</div>
+			<form id="alarm-form" class="panel" autocomplete="off">
+				<label class="field">
+					<span>Set alarm time</span>
+					<input id="alarm-time" type="time" required>
+				</label>
+				<div class="row">
+					<button id="set-alarm" type="submit" class="btn primary">Set Alarm</button>
+					<button id="clear-alarm" type="button" class="btn muted">Clear</button>
+				</div>
+			</form>
+			<div id="alarm-status" class="status" aria-live="polite"></div>
+			<div id="alarm-ringing" class="ringing" hidden>
+				<div class="ringing-title">Alarm!</div>
+				<div class="row">
+					<button id="alarm-stop" class="btn danger">Stop</button>
+					<button id="alarm-snooze" class="btn">Snooze 5 min</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- Stopwatch: landscape-primary -->
+		<section id="view-stopwatch" class="view" data-mode="landscape-primary" hidden>
+			<h1 class="view-title">Stopwatch</h1>
+			<div class="timer-display" aria-live="polite">
+				<div id="stopwatch-time" class="time-large">00:00.00</div>
+			</div>
+			<div class="row">
+				<button id="sw-start-stop" class="btn primary">Start</button>
+				<button id="sw-lap" class="btn">Lap</button>
+				<button id="sw-reset" class="btn muted">Reset</button>
+			</div>
+			<ol id="sw-laps" class="laps" aria-label="Lap times"></ol>
+		</section>
+
+		<!-- Timer: portrait-secondary -->
+		<section id="view-timer" class="view" data-mode="portrait-secondary" hidden>
+			<h1 class="view-title">Timer</h1>
+			<div class="timer-display">
+				<div id="timer-time" class="time-large">00:00</div>
+				<canvas id="timer-ring" width="240" height="240" class="ring"></canvas>
+			</div>
+			<form id="timer-form" class="panel" autocomplete="off">
+				<div class="row">
+					<label class="field grow">
+						<span>Minutes</span>
+						<input id="timer-min" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="1">
+					</label>
+					<label class="field grow">
+						<span>Seconds</span>
+						<input id="timer-sec" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0">
+					</label>
+				</div>
+				<div class="row wrap">
+					<button type="button" class="chip" data-preset="60">1 min</button>
+					<button type="button" class="chip" data-preset="300">5 min</button>
+					<button type="button" class="chip" data-preset="600">10 min</button>
+					<button type="button" class="chip" data-preset="900">15 min</button>
+				</div>
+				<div class="row">
+					<button id="timer-start-stop" type="button" class="btn primary">Start</button>
+					<button id="timer-reset" type="button" class="btn muted">Reset</button>
+				</div>
+			</form>
+			<div id="timer-status" class="status" aria-live="polite"></div>
+		</section>
+
+		<!-- Weather: landscape-secondary -->
+		<section id="view-weather" class="view" data-mode="landscape-secondary" hidden>
+			<h1 class="view-title">Weather of the Day</h1>
+			<div class="weather" id="weather" aria-live="polite">
+				<div class="weather-row">
+					<div id="weather-location" class="weather-location">Locating…</div>
+					<div id="weather-icon" class="weather-icon" aria-hidden="true">⛅️</div>
+				</div>
+				<div class="weather-row">
+					<div class="weather-temp"><span id="weather-temp">--</span>°</div>
+					<div class="weather-desc" id="weather-desc">—</div>
+				</div>
+				<div class="weather-extra" id="weather-extra"></div>
+				<div class="small muted" id="weather-note">Enable location for local weather. Using fallback if denied.</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="app-footer" role="contentinfo">
+		<div>Rotate your device to switch modes: Portrait → Alarm, Landscape → Stopwatch, Upside-down Portrait → Timer, Opposite Landscape → Weather.</div>
+	</footer>
+
+	<script src="./app.js" type="module"></script>
+</body>
+</html>
