@@ -59,8 +59,8 @@ body {
 }
 .orientation-label { color: var(--muted); font-size: 12px; }
 
-.app { flex: 1; display: grid; place-items: stretch; padding: 16px; gap: 16px; }
-.view { display: grid; align-content: start; gap: 16px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); backdrop-filter: blur(10px); }
+.app { flex: 1; display: grid; place-items: stretch; padding: 16px; gap: 16px; contain: content; }
+.view { display: grid; align-content: start; gap: 16px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .view:not([hidden]) { animation: viewIn 320ms ease-out both; }
 @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .view-title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
@@ -98,7 +98,7 @@ body {
 .btn:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.25); }
 .btn:active { transform: translateY(1px) scale(0.99); }
 .btn:focus-visible { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(34,211,238,0.25); }
-.btn.primary { background: linear-gradient(90deg, rgba(34,211,238,0.18), rgba(139,92,246,0.18)); border-color: rgba(255,255,255,0.12); box-shadow: 0 0 24px 0 var(--glow-brand), inset 0 0 20px rgba(34,211,238,0.08); }
+.btn.primary { background: linear-gradient(90deg, rgba(34,211,238,0.2), rgba(139,92,246,0.2)); border-color: rgba(255,255,255,0.16); box-shadow: 0 0 24px 0 var(--glow-brand), inset 0 0 20px rgba(34,211,238,0.08); }
 .btn.muted { color: var(--muted); }
 .btn.danger { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); }
 
@@ -114,7 +114,7 @@ body {
 .chip:hover { border-color: rgba(255,255,255,0.25); }
 .chip:active { transform: translateY(1px) scale(0.98); }
 
-.laps { list-style: decimal; padding-left: 18px; margin: 0; display: grid; gap: 6px; max-height: 200px; overflow: auto; }
+.laps { list-style: decimal; padding-left: 18px; margin: 0; display: grid; gap: 6px; max-height: 200px; overflow: auto; overscroll-behavior: contain; }
 .laps li { display: flex; justify-content: space-between; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 14px; color: var(--muted); background: rgba(11,22,44,0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 6px 8px; }
 
 .weather { display: grid; gap: 12px; }
