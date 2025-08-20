@@ -157,6 +157,35 @@ body::before {
 
 .app-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.06); color: var(--muted); font-size: 12px; }
 
+/* Cohesive wow-factor: remove aurora, add vignette and subtle shimmers */
+body::before { content: none !important; }
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background: radial-gradient(80% 80% at 50% 40%, transparent 60%, rgba(0,0,0,0.22) 100%);
+}
+
+.view-title { position: relative; padding-bottom: 8px; }
+.view-title::after {
+	content: "";
+	position: absolute; left: 0; bottom: 0;
+	width: 64px; height: 3px; border-radius: 999px;
+	background: linear-gradient(90deg, var(--brand), var(--accent));
+	filter: drop-shadow(0 0 8px rgba(34,229,255,0.3));
+	animation: shimmer 2.8s ease-in-out infinite;
+}
+@keyframes shimmer { 0%,100% { opacity: 0.7; transform: translateX(0); } 50% { opacity: 1; transform: translateX(6px); } }
+
+.btn.primary {
+	background-size: 200% 100%;
+	background-image: linear-gradient(90deg, rgba(34,229,255,0.28), rgba(124,77,255,0.28));
+	animation: gradientShift 8s linear infinite;
+}
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
 /* Wow-factor enhancements */
 .app-header, .app, .app-footer { position: relative; z-index: 1; }
 
