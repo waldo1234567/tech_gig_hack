@@ -61,7 +61,25 @@ body {
 .orientation-label { color: var(--muted); font-size: 12px; }
 
 .app { flex: 1; display: grid; place-items: stretch; padding: 16px; gap: 16px; contain: content; }
-.bg-aurora { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.7; }
+/* Body ambient overlay (CSS-only, subtle) */
+body::before {
+	content: "";
+	position: fixed;
+	inset: -10%;
+	background:
+		radial-gradient(600px 260px at 20% -10%, rgba(34,229,255,0.10), transparent 60%),
+		radial-gradient(600px 260px at 80% 110%, rgba(124,77,255,0.10), transparent 60%),
+		radial-gradient(400px 200px at 50% 120%, rgba(49,230,165,0.08), transparent 70%);
+	filter: blur(18px);
+	opacity: 0.8;
+	pointer-events: none;
+	z-index: 0;
+	animation: ambientShift 20s ease-in-out infinite alternate;
+}
+@keyframes ambientShift {
+	0% { transform: translate3d(0,0,0) scale(1); }
+	100% { transform: translate3d(0,-2%,0) scale(1.02); }
+}
 .view { display: grid; align-content: start; gap: 16px; background: var(--panel); border: 1px solid rgba(255,255,255,0.10); border-radius: 18px; padding: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .view:not([hidden]) { animation: viewIn 320ms ease-out both; }
 @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -161,11 +179,11 @@ body {
 	position: absolute;
 	inset: -2px;
 	border-radius: 20px;
-	background: conic-gradient(from 0deg, rgba(34,229,255,0.25), rgba(124,77,255,0.25), rgba(49,230,165,0.18), rgba(34,229,255,0.25));
-	filter: blur(10px);
-	opacity: 0.55;
+	background: conic-gradient(from 0deg, rgba(34,229,255,0.18), rgba(124,77,255,0.18), rgba(49,230,165,0.12), rgba(34,229,255,0.18));
+	filter: blur(8px);
+	opacity: 0.42;
 	z-index: -1;
-	animation: spinGlow 12s linear infinite;
+	animation: spinGlow 18s linear infinite;
 }
 @keyframes spinGlow { to { transform: rotate(360deg); } }
 
