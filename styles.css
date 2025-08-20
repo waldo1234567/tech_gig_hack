@@ -152,6 +152,26 @@ body::before {
 #view-stopwatch:not([hidden]) .time-large { animation: textShimmer 4.4s linear infinite; background-size: 200% 100%; }
 @keyframes textShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
 
+/* Orientation-enter animations per view */
+#view-alarm:not([hidden]) { animation: popUp 360ms cubic-bezier(.2,.9,.2,1) both, glowPulse 6s ease-in-out infinite; will-change: transform, opacity; }
+#view-stopwatch:not([hidden]) { animation: slideInRight 420ms cubic-bezier(.2,.9,.2,1) both, glowPulse 6s ease-in-out infinite; will-change: transform, opacity; }
+#view-timer:not([hidden]) { animation: slideInDown 420ms cubic-bezier(.2,.9,.2,1) both, glowPulse 6s ease-in-out infinite; will-change: transform, opacity; }
+#view-weather:not([hidden]) { animation: slideInLeft 420ms cubic-bezier(.2,.9,.2,1) both, glowPulse 6s ease-in-out infinite; will-change: transform, opacity; }
+
+@keyframes popUp { from { opacity: 0; transform: translateY(10px) scale(.98); filter: blur(4px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(24px) scale(.98); filter: blur(3px); } to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); } }
+@keyframes slideInLeft { from { opacity: 0; transform: translateX(-24px) scale(.98); filter: blur(3px); } to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); } }
+@keyframes slideInDown { from { opacity: 0; transform: translateY(-18px) scale(.98); filter: blur(3px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+
+/* Respect motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	.view:not([hidden]),
+	#view-alarm:not([hidden]),
+	#view-stopwatch:not([hidden]),
+	#view-timer:not([hidden]),
+	#view-weather:not([hidden]) { animation: none !important; }
+}
+
 .chip { padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: #0a1330; color: var(--text); transition: transform 120ms ease, background 200ms ease, border-color 200ms ease; }
 .chip:hover { border-color: rgba(255,255,255,0.25); }
 .chip:active { transform: translateY(1px) scale(0.98); }
