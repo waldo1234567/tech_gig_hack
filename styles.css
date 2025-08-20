@@ -138,6 +138,40 @@ body {
 }
 
 .app-footer { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.06); color: var(--muted); font-size: 12px; }
+
+/* Wow-factor enhancements */
+.app-header, .app, .app-footer { position: relative; z-index: 1; }
+
+.brand { background-size: 200% 100%; animation: brandSlide 6s linear infinite; }
+@keyframes brandSlide { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+
+.orientation-label {
+	background: linear-gradient(180deg, rgba(10,19,48,0.6), rgba(9,18,44,0.6));
+	border: 1px solid rgba(255,255,255,0.12);
+	border-radius: 999px;
+	padding: 6px 10px;
+	box-shadow: 0 0 0 0 rgba(34,229,255,0.0), 0 0 24px rgba(124,77,255,0.12);
+	animation: pulseSoft 3.2s ease-in-out infinite;
+}
+@keyframes pulseSoft { 0%, 100% { box-shadow: 0 0 0 0 rgba(34,229,255,0.0), 0 0 24px rgba(124,77,255,0.12); } 50% { box-shadow: 0 0 0 4px rgba(34,229,255,0.08), 0 0 28px rgba(124,77,255,0.18); } }
+
+/* Animated neon border overlay */
+.view:not([hidden])::before {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border-radius: 20px;
+	background: conic-gradient(from 0deg, rgba(34,229,255,0.25), rgba(124,77,255,0.25), rgba(49,230,165,0.18), rgba(34,229,255,0.25));
+	filter: blur(10px);
+	opacity: 0.55;
+	z-index: -1;
+	animation: spinGlow 12s linear infinite;
+}
+@keyframes spinGlow { to { transform: rotate(360deg); } }
+
+/* Extra glow on primary actions */
+.btn.primary { box-shadow: 0 0 28px 0 var(--glow-brand), 0 0 60px rgba(124,77,255,0.18) inset; }
+.ring { filter: drop-shadow(0 0 18px rgba(124,77,255,0.22)) drop-shadow(0 0 10px rgba(34,229,255,0.18)); }
 :root {
 	--bg: #070814;
 	--panel: rgba(12,14,28,0.82);
