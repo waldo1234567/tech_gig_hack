@@ -61,6 +61,9 @@ body {
 .orientation-label { color: var(--muted); font-size: 13px; }
 
 .app { flex: 1; display: grid; place-items: stretch; padding: 16px; gap: 16px; contain: content; }
+.mode-legend { display: grid; grid-auto-flow: column; gap: 8px; padding: 8px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.mode-legend::-webkit-scrollbar { display: none; }
+.legend-chip { white-space: nowrap; color: var(--muted); font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); background: rgba(10,19,48,0.55); }
 /* Body ambient overlay (CSS-only, subtle) */
 body::before {
 	content: "";
@@ -83,7 +86,8 @@ body::before {
 .view { display: grid; align-content: start; gap: 16px; background: var(--panel); border: 1px solid rgba(255,255,255,0.10); border-radius: 18px; padding: 18px; box-shadow: 0 20px 40px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.03); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .view:not([hidden]) { animation: viewIn 320ms ease-out both; }
 @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-.view-title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+.view-title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px; display: flex; align-items: center; gap: 8px; }
+.view-title .icon { font-size: 20px; filter: drop-shadow(0 0 10px rgba(34,229,255,0.25)); }
 .view:not([hidden]) { position: relative; }
 .view:not([hidden])::after { content: ""; position: absolute; inset: -1px; border-radius: 18px; pointer-events: none; background: radial-gradient(120px 40px at 10% -10%, rgba(34,229,255,0.18), transparent 60%), radial-gradient(120px 40px at 90% 110%, rgba(124,77,255,0.18), transparent 60%); filter: blur(8px); opacity: 0.7; }
 
