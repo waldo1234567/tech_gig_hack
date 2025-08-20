@@ -1,5 +1,356 @@
+/* ===== Theme variables ===== */
+:root {
+	--bg: #0f172a; /* slate-900 */
+	--surface: #0b1220; /* deep slate */
+	--surface-2: #111827; /* slate-800 */
+	--border: #1e293b; /* slate-700 */
+	--muted: #94a3b8; /* slate-400 */
+	--text: #e2e8f0; /* slate-200 */
+	--text-strong: #f8fafc; /* slate-50 */
+	--primary: #22d3ee; /* cyan-400 */
+	--primary-600: #0891b2; /* cyan-600 */
+	--danger: #ef4444; /* red-500 */
+	--ring: #334155; /* slate-600 */
+	--shadow: 0 8px 30px rgba(2, 6, 23, 0.5);
+	--radius: 12px;
+	--radius-sm: 8px;
+	--spacing: 16px;
+	--spacing-sm: 10px;
+}
+
+/* ===== Resets & base ===== */
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+	font-size: 16px;
+	line-height: 1.5;
+	background: radial-gradient(1200px 600px at 70% -10%, rgba(34, 211, 238, 0.08), transparent 60%), var(--bg);
+	color: var(--text);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+img, canvas, svg, video {
+	display: block;
+	max-width: 100%;
+}
+
+[hidden] { display: none !important; }
+
+/* ===== Layout: header, main, footer ===== */
+.app-header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--spacing);
+	padding: 14px var(--spacing);
+	background: linear-gradient(180deg, rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.65));
+	backdrop-filter: saturate(140%) blur(8px);
+	border-bottom: 1px solid var(--border);
+}
+
 .brand {
 	font-weight: 800;
 	letter-spacing: 0.3px;
+	color: var(--text-strong);
+	font-size: 18px;
+}
+
+.orientation-label {
+	color: var(--muted);
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.mode-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 10px var(--spacing) 0;
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.legend-chip {
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+	border-radius: 999px;
+	padding: 6px 10px;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.app {
+	max-width: 980px;
+	margin: 0 auto;
+	padding: var(--spacing);
+}
+
+.view {
+	display: block;
+	margin: 18px 0 28px;
+}
+
+.view-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 12px;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--text-strong);
+}
+
+.icon { font-size: 22px; }
+
+.app-footer {
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	text-align: center;
+	padding: 18px var(--spacing) 26px;
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+/* ===== Utilities ===== */
+.row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.row.wrap { flex-wrap: wrap; }
+.grow { flex: 1 1 auto; }
+.small { font-size: 12px; }
+.muted { color: var(--muted); }
+
+/* ===== Cards / Panels ===== */
+.panel {
+	display: grid;
+	gap: 12px;
+	padding: 14px;
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+}
+
+.field {
+	display: grid;
+	gap: 6px;
+}
+
+.field > span {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--muted);
+}
+
+input[type="time"],
+input[type="text"],
+input[type="number"],
+input[pattern],
+input[placeholder] {
+	appearance: none;
+	width: 100%;
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--border);
+	background: var(--surface-2);
 	color: var(--text);
+	font-family: inherit;
+	font-size: 16px;
+	outline: none;
+	transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input:focus {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+
+/* ===== Buttons ===== */
+.btn {
+	appearance: none;
+	border: 1px solid var(--border);
+	background: var(--surface-2);
+	color: var(--text);
+	padding: 10px 14px;
+	border-radius: var(--radius-sm);
+	font-weight: 700;
+	font-size: 14px;
+	letter-spacing: 0.2px;
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 120ms ease, border-color 120ms ease, transform 60ms ease;
+}
+
+.btn:hover { border-color: #334155; }
+.btn:active { transform: translateY(1px); }
+
+.btn.primary {
+	border-color: transparent;
+	background: linear-gradient(180deg, rgba(34, 211, 238, 0.18), rgba(34, 211, 238, 0.08));
+	color: var(--text-strong);
+}
+
+.btn.primary:hover { background: linear-gradient(180deg, rgba(34, 211, 238, 0.26), rgba(34, 211, 238, 0.12)); }
+
+.btn.muted {
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+	color: var(--muted);
+}
+
+.btn.danger {
+	border-color: rgba(239, 68, 68, 0.4);
+	background: linear-gradient(180deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.08));
+	color: #fee2e2;
+}
+
+/* ===== Chips ===== */
+.chip {
+	appearance: none;
+	border: 1px solid var(--border);
+	background: var(--surface-2);
+	color: var(--text);
+	padding: 8px 12px;
+	border-radius: 999px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.chip:hover { border-color: #334155; }
+
+/* ===== Alarm view ===== */
+.clock {
+	display: grid;
+	place-items: center;
+	margin: 8px 0 14px;
+}
+
+.clock-time {
+	font-variant-numeric: tabular-nums;
+	font-weight: 800;
+	font-size: clamp(40px, 8vw, 72px);
+	letter-spacing: 0.5px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 20px 40px rgba(34, 211, 238, 0.08);
+}
+
+.status { min-height: 20px; margin-top: 6px; color: var(--muted); }
+
+.ringing {
+	margin-top: 10px;
+	padding: 12px;
+	border: 1px solid rgba(239, 68, 68, 0.4);
+	background: linear-gradient(180deg, rgba(239, 68, 68, 0.12), rgba(0,0,0,0.12));
+	border-radius: var(--radius);
+}
+
+.ringing-title { font-weight: 800; margin-bottom: 10px; }
+
+/* ===== Stopwatch view ===== */
+.timer-display {
+	display: grid;
+	place-items: center;
+	margin: 6px 0 14px;
+}
+
+.time-large {
+	font-variant-numeric: tabular-nums;
+	font-weight: 800;
+	font-size: clamp(36px, 8vw, 64px);
+}
+
+.laps {
+	list-style: none;
+	padding: 0;
+	margin: 12px 0 0;
+	display: grid;
+	gap: 8px;
+}
+
+.laps li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+}
+
+.laps li > span:first-child { color: var(--muted); font-weight: 600; }
+
+/* ===== Timer view ===== */
+.ring {
+	display: block;
+	margin: 8px auto 0;
+}
+
+/* ===== Weather view ===== */
+.weather {
+	display: grid;
+	gap: 10px;
+	padding: 14px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+	box-shadow: var(--shadow);
+}
+
+.weather-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.weather-location { font-weight: 700; }
+.weather-icon { font-size: 36px; }
+.weather-temp { font-size: clamp(36px, 8vw, 56px); font-weight: 800; }
+.weather-desc { color: var(--muted); font-weight: 600; }
+
+.weather-extra {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.weather-extra > div {
+	text-align: center;
+	padding: 10px 8px;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+}
+
+.weather-extra .small { margin-bottom: 4px; display: block; }
+
+/* ===== Focus ring for accessibility ===== */
+.btn:focus,
+.chip:focus,
+input:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18), 0 0 0 1px var(--primary-600);
+}
+
+/* ===== Responsive tweaks ===== */
+@media (min-width: 768px) {
+	.app { padding: calc(var(--spacing) + 6px); }
+	.panel { padding: 18px; }
+	.view-title { font-size: 22px; }
+	.icon { font-size: 24px; }
 }
