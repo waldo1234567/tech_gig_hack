@@ -58,7 +58,7 @@ body {
 	color: transparent;
 	text-shadow: 0 0 24px rgba(34,229,255,0.25), 0 0 18px rgba(124,77,255,0.22);
 }
-.orientation-label { color: var(--muted); font-size: 12px; }
+.orientation-label { color: var(--muted); font-size: 13px; }
 
 .app { flex: 1; display: grid; place-items: stretch; padding: 16px; gap: 16px; contain: content; }
 /* Body ambient overlay (CSS-only, subtle) */
