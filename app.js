@@ -1,111 +1,123 @@
 // Mobile-first, in-browser only app. No external frameworks.
-// Features switch based on orientation:
-// - portrait-primary: Alarm Clock
+// Orientation → Feature:
+// - portrait-primary: Alarm
 // - landscape-primary: Stopwatch
 // - portrait-secondary: Timer
-// - landscape-secondary: Weather of the Day
+// - landscape-secondary: Weather
 
-const orientationLabel = document.getElementById('orientation-label');
-const views = {
+// DOM refs (may be null until DOM parsed)
+var orientationLabel = document.getElementById('orientation-label');
+var views = {
 	'alarm': document.getElementById('view-alarm'),
 	'stopwatch': document.getElementById('view-stopwatch'),
 	'timer': document.getElementById('view-timer'),
-	'weather': document.getElementById('view-weather'),
+	'weather': document.getElementById('view-weather')
 };
 
 function setActiveView(key) {
-	for (const [k, el] of Object.entries(views)) {
-		el.hidden = k !== key;
+	for (var k in views) {
+		if (!Object.prototype.hasOwnProperty.call(views, k)) continue;
+		var el = views[k];
+		if (el) el.hidden = k !== key;
 	}
 }
 
-// Orientation detection with robust fallbacks
 function getOrientationType() {
-	const screenOrientation = screen.orientation || screen.msOrientation || screen.mozOrientation;
-	if (screenOrientation && screenOrientation.type) return screenOrientation.type; // e.g., 'portrait-primary'
-
-	// Fallback via window.orientation (legacy iOS Safari)
-	const angle = typeof window.orientation === 'number' ? window.orientation : window.screen?.orientation?.angle;
-	const isPortrait = matchMedia('(orientation: portrait)').matches;
-	if (isPortrait) {
-		return angle === 180 ? 'portrait-secondary' : 'portrait-primary';
-	} else {
-		// angle 0/180 depends, use heuristic
-		return angle === 180 ? 'landscape-secondary' : 'landscape-primary';
+	var so = (typeof screen !== 'undefined') && (screen.orientation || screen.msOrientation || screen.mozOrientation);
+	if (so && so.type) return so.type;
+	if (typeof window !== 'undefined' && typeof window.orientation === 'number') {
+		var a = window.orientation; // 0, 90, -90, 180
+		if (a === 0) return 'portrait-primary';
+		if (a === 180) return 'portrait-secondary';
+		if (a === 90) return 'landscape-primary';
+		if (a === -90) return 'landscape-secondary';
 	}
+	var isPortrait = false;
+	try { isPortrait = !!(window.matchMedia && window.matchMedia('(orientation: portrait)').matches); } catch (e) {}
+	return isPortrait ? 'portrait-primary' : 'landscape-primary';
+}
+
+function prettyOrientation(type) {
+	var map = {
+		'portrait-primary': 'Portrait • Alarm',
+		'portrait-secondary': 'Portrait (Upside-down) • Timer',
+		'landscape-primary': 'Landscape • Stopwatch',
+		'landscape-secondary': 'Landscape (Opposite) • Weather'
+	};
+	return map[type] || type.replace('-', ' ');
 }
 
 function updateByOrientation() {
-	const type = getOrientationType();
-	orientationLabel.textContent = type.replace('-', ' ');
-	if (type.startsWith('portrait')) {
-		if (type.endsWith('primary')) setActiveView('alarm');
-		else setActiveView('timer');
-	} else if (type.startsWith('landscape')) {
-		if (type.endsWith('primary')) setActiveView('stopwatch');
-		else setActiveView('weather');
+	var type = getOrientationType();
+	var labelEl = document.getElementById('orientation-label');
+	if (labelEl) labelEl.textContent = prettyOrientation(type);
+	if (type.indexOf('portrait') === 0) {
+		if (type.indexOf('primary') > -1) setActiveView('alarm'); else setActiveView('timer');
+	} else if (type.indexOf('landscape') === 0) {
+		if (type.indexOf('primary') > -1) setActiveView('stopwatch'); else setActiveView('weather');
 	}
 }
 
-// Listen to orientation changes
-['orientationchange', 'resize'].forEach(evt => window.addEventListener(evt, () => {
-	updateByOrientation();
-}, { passive: true }));
-
-if (screen.orientation && screen.orientation.addEventListener) {
+['orientationchange', 'resize'].forEach(function(evt){
+	window.addEventListener(evt, function(){ updateByOrientation(); }, { passive: true });
+});
+if (typeof screen !== 'undefined' && screen.orientation && screen.orientation.addEventListener) {
 	screen.orientation.addEventListener('change', updateByOrientation, { passive: true });
 }
 
-// Initialize
-updateByOrientation();
+function initApp() {
+	updateByOrientation();
+	startClock();
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', function(){ initApp(); }, { once: true });
+} else {
+	initApp();
+}
 
 // ================= Alarm =================
-const clockTimeEl = document.getElementById('clock-time');
-const alarmForm = document.getElementById('alarm-form');
-const alarmTimeInput = document.getElementById('alarm-time');
-const setAlarmBtn = document.getElementById('set-alarm');
-const clearAlarmBtn = document.getElementById('clear-alarm');
-const alarmStatusEl = document.getElementById('alarm-status');
-const alarmRingingEl = document.getElementById('alarm-ringing');
-const alarmStopBtn = document.getElementById('alarm-stop');
-const alarmSnoozeBtn = document.getElementById('alarm-snooze');
+var clockTimeEl = document.getElementById('clock-time');
+var alarmForm = document.getElementById('alarm-form');
+var alarmTimeInput = document.getElementById('alarm-time');
+var clearAlarmBtn = document.getElementById('clear-alarm');
+var alarmStatusEl = document.getElementById('alarm-status');
+var alarmRingingEl = document.getElementById('alarm-ringing');
+var alarmStopBtn = document.getElementById('alarm-stop');
+var alarmSnoozeBtn = document.getElementById('alarm-snooze');
 
-let alarmTimeoutId = null;
-let alarmTargetMs = null;
-let alarmAudio = null;
+var alarmTimeoutId = null;
+var alarmTargetMs = null;
+var alarmAudio = null;
 
 function formatClock(date) {
-	const h = String(date.getHours()).padStart(2, '0');
-	const m = String(date.getMinutes()).padStart(2, '0');
-	const s = String(date.getSeconds()).padStart(2, '0');
-	return `${h}:${m}:${s}`;
+	var h = String(date.getHours()).padStart(2, '0');
+	var m = String(date.getMinutes()).padStart(2, '0');
+	var s = String(date.getSeconds()).padStart(2, '0');
+	return h + ':' + m + ':' + s;
 }
 
 function tickClock() {
-	clockTimeEl.textContent = formatClock(new Date());
+	if (clockTimeEl) clockTimeEl.textContent = formatClock(new Date());
 }
-setInterval(tickClock, 500);
-tickClock();
+function startClock(){ setInterval(tickClock, 500); tickClock(); }
 
 function scheduleAlarm(targetDate) {
-	const now = Date.now();
-	const delay = Math.max(0, targetDate.getTime() - now);
+	var now = Date.now();
+	var delay = Math.max(0, targetDate.getTime() - now);
 	clearTimeout(alarmTimeoutId);
 	alarmTimeoutId = setTimeout(triggerAlarm, delay);
 	alarmTargetMs = targetDate.getTime();
-	alarmStatusEl.textContent = `Alarm set for ${targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+	if (alarmStatusEl) alarmStatusEl.textContent = 'Alarm set for ' + targetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function triggerAlarm() {
-	alarmRingingEl.hidden = false;
-	alarmStatusEl.textContent = 'Alarm ringing!';
+	if (alarmRingingEl) alarmRingingEl.hidden = false;
+	if (alarmStatusEl) alarmStatusEl.textContent = 'Alarm ringing!';
 	try {
-		if (!alarmAudio) {
-			alarmAudio = new Audio('data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAA...');
-			// Using a tiny silent-then-beep placeholder; browsers may block without interaction.
-		}
+		if (!alarmAudio) alarmAudio = new Audio('data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAA...');
 		alarmAudio.loop = true;
-		alarmAudio.play().catch(() => {});
+		alarmAudio.play().catch(function(){});
 	} catch (e) {}
 }
 
@@ -116,75 +128,74 @@ function stopAlarmAudio() {
 	}
 }
 
-alarmForm.addEventListener('submit', (e) => {
+if (alarmForm) alarmForm.addEventListener('submit', function(e){
 	e.preventDefault();
-	const value = alarmTimeInput.value; // HH:MM
+	var value = alarmTimeInput && alarmTimeInput.value;
 	if (!value) return;
-	const [hh, mm] = value.split(':').map(Number);
-	const now = new Date();
-	const target = new Date();
+	var parts = value.split(':');
+	var hh = parseInt(parts[0], 10) || 0;
+	var mm = parseInt(parts[1], 10) || 0;
+	var now = new Date();
+	var target = new Date();
 	target.setHours(hh, mm, 0, 0);
-	if (target.getTime() <= now.getTime()) {
-		// schedule for next day
-		target.setDate(target.getDate() + 1);
-	}
+	if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
 	scheduleAlarm(target);
-	alarmRingingEl.hidden = true;
+	if (alarmRingingEl) alarmRingingEl.hidden = true;
 });
 
-clearAlarmBtn.addEventListener('click', () => {
+if (clearAlarmBtn) clearAlarmBtn.addEventListener('click', function(){
 	clearTimeout(alarmTimeoutId);
 	alarmTimeoutId = null;
 	alarmTargetMs = null;
-	alarmStatusEl.textContent = 'Alarm cleared';
-	alarmRingingEl.hidden = true;
+	if (alarmStatusEl) alarmStatusEl.textContent = 'Alarm cleared';
+	if (alarmRingingEl) alarmRingingEl.hidden = true;
 	stopAlarmAudio();
 });
 
-alarmStopBtn.addEventListener('click', () => {
-	alarmRingingEl.hidden = true;
-	alarmStatusEl.textContent = 'Alarm stopped';
+if (alarmStopBtn) alarmStopBtn.addEventListener('click', function(){
+	if (alarmRingingEl) alarmRingingEl.hidden = true;
+	if (alarmStatusEl) alarmStatusEl.textContent = 'Alarm stopped';
 	stopAlarmAudio();
 });
 
-alarmSnoozeBtn.addEventListener('click', () => {
-	const snoozeMs = 5 * 60 * 1000;
-	const target = new Date(Date.now() + snoozeMs);
+if (alarmSnoozeBtn) alarmSnoozeBtn.addEventListener('click', function(){
+	var snoozeMs = 5 * 60 * 1000;
+	var target = new Date(Date.now() + snoozeMs);
 	scheduleAlarm(target);
-	alarmRingingEl.hidden = true;
+	if (alarmRingingEl) alarmRingingEl.hidden = true;
 	stopAlarmAudio();
 });
 
 // ================= Stopwatch =================
-const swTimeEl = document.getElementById('stopwatch-time');
-const swStartStopBtn = document.getElementById('sw-start-stop');
-const swLapBtn = document.getElementById('sw-lap');
-const swResetBtn = document.getElementById('sw-reset');
-const swLapsEl = document.getElementById('sw-laps');
+var swTimeEl = document.getElementById('stopwatch-time');
+var swStartStopBtn = document.getElementById('sw-start-stop');
+var swLapBtn = document.getElementById('sw-lap');
+var swResetBtn = document.getElementById('sw-reset');
+var swLapsEl = document.getElementById('sw-laps');
 
-let swRunning = false;
-let swStartEpoch = 0;
-let swElapsedMs = 0;
-let swRafId = 0;
+var swRunning = false;
+var swStartEpoch = 0;
+var swElapsedMs = 0;
+var swRafId = 0;
 
 function formatStopwatch(ms) {
-	const totalCentis = Math.floor(ms / 10);
-	const minutes = Math.floor(totalCentis / 6000);
-	const seconds = Math.floor((totalCentis % 6000) / 100);
-	const centis = totalCentis % 100;
-	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centis).padStart(2, '0')}`;
+	var totalCentis = Math.floor(ms / 10);
+	var minutes = Math.floor(totalCentis / 6000);
+	var seconds = Math.floor((totalCentis % 6000) / 100);
+	var centis = totalCentis % 100;
+	return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0') + '.' + String(centis).padStart(2, '0');
 }
 
 function swTick() {
 	if (swRunning) {
-		const now = performance.now();
+		var now = performance.now();
 		swElapsedMs = now - swStartEpoch;
-		swTimeEl.textContent = formatStopwatch(swElapsedMs);
+		if (swTimeEl) swTimeEl.textContent = formatStopwatch(swElapsedMs);
 		swRafId = requestAnimationFrame(swTick);
 	}
 }
 
-swStartStopBtn.addEventListener('click', () => {
+if (swStartStopBtn) swStartStopBtn.addEventListener('click', function(){
 	if (!swRunning) {
 		swRunning = true;
 		swStartEpoch = performance.now() - swElapsedMs;
@@ -197,263 +208,215 @@ swStartStopBtn.addEventListener('click', () => {
 	}
 });
 
-swLapBtn.addEventListener('click', () => {
-	const li = document.createElement('li');
-	const lapIndex = swLapsEl.children.length + 1;
-	li.innerHTML = `<span>Lap ${lapIndex}</span><span>${formatStopwatch(swElapsedMs)}</span>`;
+if (swLapBtn) swLapBtn.addEventListener('click', function(){
+	if (!swLapsEl) return;
+	var li = document.createElement('li');
+	var lapIndex = swLapsEl.children.length + 1;
+	li.innerHTML = '<span>Lap ' + lapIndex + '</span><span>' + formatStopwatch(swElapsedMs) + '</span>';
 	swLapsEl.prepend(li);
 });
 
-swResetBtn.addEventListener('click', () => {
+if (swResetBtn) swResetBtn.addEventListener('click', function(){
 	swRunning = false;
 	cancelAnimationFrame(swRafId);
 	swElapsedMs = 0;
-	swTimeEl.textContent = '00:00.00';
-	swStartStopBtn.textContent = 'Start';
-	swLapsEl.innerHTML = '';
+	if (swTimeEl) swTimeEl.textContent = '00:00.00';
+	if (swStartStopBtn) swStartStopBtn.textContent = 'Start';
+	if (swLapsEl) swLapsEl.innerHTML = '';
 });
 
 // ================= Timer =================
-const timerTimeEl = document.getElementById('timer-time');
-const timerRing = document.getElementById('timer-ring');
-const timerStartStopBtn = document.getElementById('timer-start-stop');
-const timerResetBtn = document.getElementById('timer-reset');
-const timerMinInput = document.getElementById('timer-min');
-const timerSecInput = document.getElementById('timer-sec');
-const timerStatusEl = document.getElementById('timer-status');
-const timerForm = document.getElementById('timer-form');
+var timerTimeEl = document.getElementById('timer-time');
+var timerRing = document.getElementById('timer-ring');
+var timerStartStopBtn = document.getElementById('timer-start-stop');
+var timerResetBtn = document.getElementById('timer-reset');
+var timerMinInput = document.getElementById('timer-min');
+var timerSecInput = document.getElementById('timer-sec');
+var timerStatusEl = document.getElementById('timer-status');
+var timerForm = document.getElementById('timer-form');
 
-let timerTotalMs = 0;
-let timerRemainingMs = 0;
-let timerEndEpoch = 0;
-let timerRunning = false;
-let timerRafId = 0;
+var timerTotalMs = 0;
+var timerRemainingMs = 0;
+var timerEndEpoch = 0;
+var timerRunning = false;
+var timerRafId = 0;
 
 function formatTimer(ms) {
-	const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-	const minutes = Math.floor(totalSeconds / 60);
-	const seconds = totalSeconds % 60;
-	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+	var totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+	var minutes = Math.floor(totalSeconds / 60);
+	var seconds = totalSeconds % 60;
+	return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
 }
 
 function drawRing(progress) {
-	const ctx = timerRing.getContext('2d');
-	const size = timerRing.width;
-	const center = size / 2;
-	const radius = center - 8;
+	if (!timerRing) return;
+	var ctx = timerRing.getContext('2d');
+	var size = timerRing.width;
+	var center = size / 2;
+	var radius = center - 8;
 	ctx.clearRect(0, 0, size, size);
 	ctx.lineWidth = 10;
-	// background
 	ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--ring');
 	ctx.beginPath();
 	ctx.arc(center, center, radius, 0, Math.PI * 2);
 	ctx.stroke();
-	// progress
 	ctx.strokeStyle = '#22d3ee';
 	ctx.beginPath();
-	const start = -Math.PI / 2;
+	var start = -Math.PI / 2;
 	ctx.arc(center, center, radius, start, start + Math.PI * 2 * progress);
 	ctx.stroke();
 }
 
 function timerTick() {
 	if (!timerRunning) return;
-	const now = performance.now();
-	const remaining = Math.max(0, timerEndEpoch - now);
+	var now = performance.now();
+	var remaining = Math.max(0, timerEndEpoch - now);
 	timerRemainingMs = remaining;
-	timerTimeEl.textContent = formatTimer(remaining);
-	const progress = timerTotalMs === 0 ? 0 : (timerTotalMs - remaining) / timerTotalMs;
+	if (timerTimeEl) timerTimeEl.textContent = formatTimer(remaining);
+	var progress = timerTotalMs === 0 ? 0 : (timerTotalMs - remaining) / timerTotalMs;
 	drawRing(progress);
 	if (remaining <= 0) {
 		timerRunning = false;
-		timerStatusEl.textContent = 'Time is up!';
+		if (timerStatusEl) timerStatusEl.textContent = 'Time is up!';
 		try { new Notification('Timer complete'); } catch (e) {}
-		vibrate([200, 100, 200, 100, 200]);
+		if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
 		return;
 	}
 	timerRafId = requestAnimationFrame(timerTick);
 }
 
 function getTimerInputMs() {
-	const min = parseInt(timerMinInput.value || '0', 10) || 0;
-	const sec = parseInt(timerSecInput.value || '0', 10) || 0;
+	var min = parseInt((timerMinInput && timerMinInput.value) || '0', 10) || 0;
+	var sec = parseInt((timerSecInput && timerSecInput.value) || '0', 10) || 0;
 	return (min * 60 + sec) * 1000;
 }
 
-timerStartStopBtn.addEventListener('click', () => {
+if (timerStartStopBtn) timerStartStopBtn.addEventListener('click', function(){
 	if (!timerRunning) {
 		timerTotalMs = timerRemainingMs > 0 ? timerRemainingMs : getTimerInputMs();
-		if (timerTotalMs <= 0) {
-			timerStatusEl.textContent = 'Set a duration first';
-			return;
-		}
+		if (timerTotalMs <= 0) { if (timerStatusEl) timerStatusEl.textContent = 'Set a duration first'; return; }
 		timerRunning = true;
 		timerEndEpoch = performance.now() + timerTotalMs;
-		timerStatusEl.textContent = 'Running…';
+		if (timerStatusEl) timerStatusEl.textContent = 'Running…';
 		timerRafId = requestAnimationFrame(timerTick);
 		timerStartStopBtn.textContent = 'Pause';
 	} else {
-		// pause
 		timerRunning = false;
 		cancelAnimationFrame(timerRafId);
 		timerRemainingMs = Math.max(0, timerEndEpoch - performance.now());
-		timerStatusEl.textContent = 'Paused';
+		if (timerStatusEl) timerStatusEl.textContent = 'Paused';
 		timerStartStopBtn.textContent = 'Resume';
 	}
 });
 
-timerResetBtn.addEventListener('click', () => {
+if (timerResetBtn) timerResetBtn.addEventListener('click', function(){
 	timerRunning = false;
 	cancelAnimationFrame(timerRafId);
 	timerRemainingMs = 0;
 	timerTotalMs = 0;
-	timerTimeEl.textContent = '00:00';
+	if (timerTimeEl) timerTimeEl.textContent = '00:00';
 	drawRing(0);
-	timerStartStopBtn.textContent = 'Start';
-	timerStatusEl.textContent = '';
+	if (timerStartStopBtn) timerStartStopBtn.textContent = 'Start';
+	if (timerStatusEl) timerStatusEl.textContent = '';
 });
 
-timerForm.addEventListener('click', (e) => {
-	const btn = e.target.closest('[data-preset]');
+if (timerForm) timerForm.addEventListener('click', function(e){
+	var btn = e.target.closest('[data-preset]');
 	if (!btn) return;
-	const seconds = parseInt(btn.getAttribute('data-preset'), 10) || 0;
-	timerMinInput.value = String(Math.floor(seconds / 60));
-	timerSecInput.value = String(seconds % 60);
+	var seconds = parseInt(btn.getAttribute('data-preset'), 10) || 0;
+	if (timerMinInput) timerMinInput.value = String(Math.floor(seconds / 60));
+	if (timerSecInput) timerSecInput.value = String(seconds % 60);
 	drawRing(0);
-	timerTimeEl.textContent = formatTimer(seconds * 1000);
+	if (timerTimeEl) timerTimeEl.textContent = formatTimer(seconds * 1000);
 });
 
 // ================= Weather =================
-const weatherLocationEl = document.getElementById('weather-location');
-const weatherTempEl = document.getElementById('weather-temp');
-const weatherDescEl = document.getElementById('weather-desc');
-const weatherExtraEl = document.getElementById('weather-extra');
-const weatherIconEl = document.getElementById('weather-icon');
+var weatherLocationEl = document.getElementById('weather-location');
+var weatherTempEl = document.getElementById('weather-temp');
+var weatherDescEl = document.getElementById('weather-desc');
+var weatherExtraEl = document.getElementById('weather-extra');
+var weatherIconEl = document.getElementById('weather-icon');
 
-async function fetchWeather(lat, lon) {
-	const url = new URL('https://api.open-meteo.com/v1/forecast');
+function fetchWeather(lat, lon) {
+	var url = new URL('https://api.open-meteo.com/v1/forecast');
 	url.searchParams.set('latitude', String(lat));
 	url.searchParams.set('longitude', String(lon));
 	url.searchParams.set('current_weather', 'true');
 	url.searchParams.set('hourly', 'relative_humidity_2m,apparent_temperature,precipitation_probability,uv_index');
 	url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_hours');
 	url.searchParams.set('timezone', 'auto');
-	const res = await fetch(url.toString());
-	if (!res.ok) throw new Error('Weather fetch failed');
-	return res.json();
+	return fetch(url.toString()).then(function(res){ if (!res.ok) throw new Error('Weather fetch failed'); return res.json(); });
 }
 
 function iconFor(code) {
-	// Simplified mapping
-	// https://open-meteo.com/en/docs#api_form
-	const map = new Map([
-		[[0], '☀️'],
-		[[1, 2], '🌤️'],
-		[[3], '☁️'],
-		[[45, 48], '🌫️'],
-		[[51, 53, 55], '🌦️'],
-		[[61, 63, 65], '🌧️'],
-		[[71, 73, 75], '❄️'],
-		[[80, 81, 82], '🌧️'],
-		[[95, 96, 99], '⛈️'],
-	]);
-	for (const [keys, emoji] of map.entries()) {
-		if (keys.includes(code)) return emoji;
-	}
+	var entries = [
+		[[0], '☀️'], [[1, 2], '🌤️'], [[3], '☁️'], [[45, 48], '🌫️'], [[51, 53, 55], '🌦️'],
+		[[61, 63, 65], '🌧️'], [[71, 73, 75], '❄️'], [[80, 81, 82], '🌧️'], [[95, 96, 99], '⛈️']
+	];
+	for (var i=0;i<entries.length;i++) { var keys=entries[i][0], em=entries[i][1]; if (keys.indexOf(code)>=0) return em; }
 	return '⛅️';
 }
 
 function describeWeather(code, wind) {
-	const desc = {
-		0: 'Clear sky',
-		1: 'Mainly clear',
-		2: 'Partly cloudy',
-		3: 'Overcast',
-		45: 'Fog',
-		48: 'Depositing rime fog',
-		51: 'Light drizzle',
-		53: 'Moderate drizzle',
-		55: 'Heavy drizzle',
-		61: 'Light rain',
-		63: 'Moderate rain',
-		65: 'Heavy rain',
-		71: 'Light snow',
-		73: 'Moderate snow',
-		75: 'Heavy snow',
-		80: 'Rain showers',
-		81: 'Rain showers',
-		82: 'Violent rain showers',
-		95: 'Thunderstorm',
-		96: 'Thunderstorm with hail',
-		99: 'Thunderstorm with hail',
-	};
-	const text = desc[code] || 'Weather';
-	if (typeof wind === 'number') return `${text} • ${Math.round(wind)} km/h wind`;
+	var desc = {0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',45:'Fog',48:'Depositing rime fog',51:'Light drizzle',53:'Moderate drizzle',55:'Heavy drizzle',61:'Light rain',63:'Moderate rain',65:'Heavy rain',71:'Light snow',73:'Moderate snow',75:'Heavy snow',80:'Rain showers',81:'Rain showers',82:'Violent rain showers',95:'Thunderstorm',96:'Thunderstorm with hail',99:'Thunderstorm with hail'};
+	var text = desc[code] || 'Weather';
+	if (typeof wind === 'number') return text + ' • ' + Math.round(wind) + ' km/h wind';
 	return text;
 }
 
-async function loadWeatherWithGeo() {
-	function fallback() {
-		// Default to New York City fallback
-		return { coords: { latitude: 40.7128, longitude: -74.0060 }, label: 'New York, USA (fallback)' };
-	}
-	const permission = await navigator.permissions?.query?.({ name: 'geolocation' }).catch(() => null);
-	const shouldAsk = !permission || permission.state !== 'denied';
-	let coords;
-	if (shouldAsk && navigator.geolocation) {
-		coords = await new Promise(resolve => {
-			navigator.geolocation.getCurrentPosition(
-				(pos) => resolve({ coords: pos.coords, label: 'Your location' }),
-				() => resolve(fallback()),
-				{ enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
-			);
+function loadWeatherWithGeo() {
+	function fallback(){ return { coords: { latitude: 40.7128, longitude: -74.0060 }, label: 'New York, USA (fallback)' }; }
+	var permPromise;
+	try { if (navigator.permissions && typeof navigator.permissions.query === 'function') { permPromise = navigator.permissions.query({ name: 'geolocation' }); } } catch (e) { permPromise = null; }
+	function onPerm(permission){
+		var shouldAsk = !permission || permission.state !== 'denied';
+		var geoPromise;
+		if (shouldAsk && navigator.geolocation) {
+			geoPromise = new Promise(function(resolve){
+				navigator.geolocation.getCurrentPosition(function(pos){ resolve({ coords: pos.coords, label: 'Your location' }); }, function(){ resolve(fallback()); }, { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 });
+			});
+		} else { geoPromise = Promise.resolve(fallback()); }
+		geoPromise.then(function(coords){
+			return fetchWeather(coords.coords.latitude, coords.coords.longitude).then(function(data){
+				var c = data.current_weather; var temp = Math.round(c.temperature);
+				if (weatherTempEl) weatherTempEl.textContent = temp;
+				if (weatherIconEl) weatherIconEl.textContent = iconFor(c.weathercode);
+				if (weatherDescEl) weatherDescEl.textContent = describeWeather(c.weathercode, c.windspeed);
+				if (weatherLocationEl) weatherLocationEl.textContent = coords.label;
+				var max = Math.round(data.daily.temperature_2m_max[0]);
+				var min = Math.round(data.daily.temperature_2m_min[0]);
+				var uv = Math.round(data.daily.uv_index_max[0]);
+				var pr = 0;
+				try {
+					var times = data.hourly && data.hourly.time;
+					var probs = data.hourly && data.hourly.precipitation_probability;
+					if (Array.isArray(times) && Array.isArray(probs)) {
+						var d = new Date(); var pad = function(n){ return String(n).padStart(2, '0'); };
+						var key = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':00';
+						var idx = times.indexOf(key); if (idx >= 0) pr = Math.round(probs[idx] || 0);
+					}
+				} catch (e) { pr = 0; }
+				if (weatherExtraEl) weatherExtraEl.innerHTML = ''+
+					'<div><div class="muted small">High</div><div>'+max+'°</div></div>'+
+					'<div><div class="muted small">Low</div><div>'+min+'°</div></div>'+
+					'<div><div class="muted small">UV</div><div>'+uv+'</div></div>'+
+					'<div><div class="muted small">Feels</div><div>'+(data.hourly && Array.isArray(data.hourly.apparent_temperature) ? Math.round(data.hourly.apparent_temperature[0]) : temp)+'°</div></div>'+
+					'<div><div class="muted small">Precip</div><div>'+pr+'%</div></div>';
+			}).catch(function(){ if (weatherLocationEl) weatherLocationEl.textContent = 'Weather unavailable'; if (weatherDescEl) weatherDescEl.textContent = 'Check connection'; });
 		});
-	} else {
-		coords = fallback();
 	}
-	try {
-		const data = await fetchWeather(coords.coords.latitude, coords.coords.longitude);
-		const c = data.current_weather;
-		const temp = Math.round(c.temperature);
-		weatherTempEl.textContent = temp;
-		weatherIconEl.textContent = iconFor(c.weathercode);
-		weatherDescEl.textContent = describeWeather(c.weathercode, c.windspeed);
-		weatherLocationEl.textContent = coords.label;
-		const max = Math.round(data.daily.temperature_2m_max[0]);
-		const min = Math.round(data.daily.temperature_2m_min[0]);
-		const uv = Math.round(data.daily.uv_index_max[0]);
-		const pr = Math.round((data.hourly.precipitation_probability?.[new Date().getHours()] ?? 0));
-		weatherExtraEl.innerHTML = `
-			<div><div class="muted small">High</div><div>${max}°</div></div>
-			<div><div class="muted small">Low</div><div>${min}°</div></div>
-			<div><div class="muted small">UV</div><div>${uv}</div></div>
-			<div><div class="muted small">Feels</div><div>${Math.round(data.hourly.apparent_temperature[0])}°</div></div>
-			<div><div class="muted small">Precip</div><div>${pr}%</div></div>
-		`;
-	} catch (e) {
-		weatherLocationEl.textContent = 'Weather unavailable';
-		weatherDescEl.textContent = 'Check connection';
-	}
+	if (permPromise && typeof permPromise.then === 'function') permPromise.then(onPerm).catch(function(){ onPerm(null); }); else onPerm(null);
 }
 
-// Load weather when weather view becomes active to save API calls
-const observer = new MutationObserver(() => {
-	if (!views.weather.hidden) {
-		loadWeatherWithGeo();
-	}
-});
-observer.observe(views.weather, { attributes: true, attributeFilter: ['hidden'] });
-
-// ============ Utilities ============
-function vibrate(pattern) {
-	if (navigator.vibrate) {
-		navigator.vibrate(pattern);
-	}
+// Trigger weather load when weather view becomes visible
+if (views.weather) {
+	var mo = new MutationObserver(function(){ if (!views.weather.hidden) loadWeatherWithGeo(); });
+	mo.observe(views.weather, { attributes: true, attributeFilter: ['hidden'] });
 }
 
-// Notification permission prompt
-if ('Notification' in window && Notification.permission === 'default') {
-	try { Notification.requestPermission().catch(() => {}); } catch (e) {}
-}
+// Simple vibrate utility (used elsewhere if needed)
+function vibrate(pattern){ if (navigator.vibrate) navigator.vibrate(pattern); }
 
-// iOS PWA prompt: lock orientation API is unreliable; we rely on detection instead.
+// Ask notification permission early (optional)
+if ('Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission().catch(function(){}); } catch (e) {} }
+
