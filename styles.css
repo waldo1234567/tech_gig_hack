@@ -21,6 +21,9 @@ body {
 	flex-direction: column;
 }
 
+/* Ensure [hidden] actually hides even when components set display */
+[hidden] { display: none !important; }
+
 .app-header, .app-footer {
 	background: linear-gradient(180deg, rgba(34,211,238,0.08), rgba(139,92,246,0.08));
 	border-bottom: 1px solid rgba(255,255,255,0.06);

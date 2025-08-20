@@ -24,15 +24,18 @@ function getOrientationType() {
 	const screenOrientation = screen.orientation || screen.msOrientation || screen.mozOrientation;
 	if (screenOrientation && screenOrientation.type) return screenOrientation.type; // e.g., 'portrait-primary'
 
-	// Fallback via window.orientation (legacy iOS Safari)
-	const angle = typeof window.orientation === 'number' ? window.orientation : window.screen?.orientation?.angle;
-	const isPortrait = matchMedia('(orientation: portrait)').matches;
-	if (isPortrait) {
-		return angle === 180 ? 'portrait-secondary' : 'portrait-primary';
-	} else {
-		// angle 0/180 depends, use heuristic
-		return angle === 180 ? 'landscape-secondary' : 'landscape-primary';
+	// Fallback mapping for iOS Safari via window.orientation
+	if (typeof window.orientation === 'number') {
+		const a = window.orientation; // 0, 90, -90, 180
+		if (a === 0) return 'portrait-primary';
+		if (a === 180) return 'portrait-secondary';
+		if (a === 90) return 'landscape-primary';
+		if (a === -90) return 'landscape-secondary';
 	}
+
+	// Heuristic fallback
+	const isPortrait = matchMedia('(orientation: portrait)').matches;
+	return isPortrait ? 'portrait-primary' : 'landscape-primary';
 }
 
 function updateByOrientation() {
