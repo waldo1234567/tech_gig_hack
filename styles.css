@@ -208,13 +208,13 @@ body::after {
 	position: absolute;
 	inset: -2px;
 	border-radius: 20px;
-	background: conic-gradient(from 0deg, rgba(34,229,255,0.18), rgba(124,77,255,0.18), rgba(49,230,165,0.12), rgba(34,229,255,0.18));
+	background: linear-gradient(180deg, rgba(34,229,255,0.14), rgba(124,77,255,0.14));
 	filter: blur(8px);
 	opacity: 0.42;
 	z-index: -1;
-	animation: spinGlow 18s linear infinite;
+    /* no rotation */
 }
-@keyframes spinGlow { to { transform: rotate(360deg); } }
+/* removed spinGlow */
 
 /* Extra glow on primary actions */
 .btn.primary { box-shadow: 0 0 28px 0 var(--glow-brand), 0 0 60px rgba(124,77,255,0.18) inset; }
